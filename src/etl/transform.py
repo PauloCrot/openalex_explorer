@@ -5,7 +5,7 @@ class WorkTransformer:
     def transform_work(raw_work: Dict[str, Any]) -> Dict[str, Any]:
         """Normaliza um registro do JSON para o modelo padrao"""
         primary_topic = raw_work.get("primary_topic") or {}
-        authorships = raw_work.get("Authorships") or []
+        authorships = raw_work.get("authorships") or []
 
         author_ids = []
         country_codes = set()

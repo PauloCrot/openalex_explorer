@@ -1,5 +1,6 @@
-from typing import Dict, Any, List, Optional
+from typing import Any, Dict, List, Optional
 from src.api.client import OpenAlexClient
+
 
 class OpenAlexExtractor:
     def __init__(self, client: OpenAlexClient):
@@ -11,8 +12,10 @@ class OpenAlexExtractor:
         match_type: str = "OR",
         topic_id: Optional[str] = None,
         min_year: Optional[str] = None,
-        limit: int = 50
+        limit: int = 50,
+        randomize: bool = False
     ) -> List[Dict[str, Any]]:
+        """Motor generico de extracao para a entidade Works."""
         filter_conditions = []
 
         if countries:
@@ -31,20 +34,17 @@ class OpenAlexExtractor:
 
         params = {
             "filter": ",".join(filter_conditions) if filter_conditions else None,
-            "per_page": limit,
             "select": "id,title,publication_year,type,primary_topic,authorships,countries_distinct_count"
         }
+
+        if randomize:
+            params["sample"] = limit
+        else:
+            params["per_page"] = limit
 
         params = {k: v for k, v in params.items() if v is not None}
         response = self.client.get("works", params=params)
         return response.get("results", [])
-
-    # Métodos convenientes para o Pipeline/Menu chamar diretamente
-    def fetch_coauthorship(self, country_a: str, country_b: str, limit: int = 10) -> List[Dict[str, Any]]:
-        return self.fetch_works(countries=[country_a, country_b], match_type="AND", limit=limit)
-
-    def fetch_by_topic(self, topic_id: str, limit: int = 10) -> List[Dict[str, Any]]:
-        return self.fetch_works(topic_id=topic_id, limit=limit)
 
     def search_topics(self, query: str, limit: int = 5) -> List[Dict[str, Any]]:
         """Busca topicos no OpenAlex por palavra-chave."""

@@ -15,3 +15,10 @@ def execute_pipeline_safely(pipeline: LatAmResearchPipeline, **kwargs):
         print(f"\n[ERRO NA CONSULTA] Nao foi possivel concluir a requisicao.")
         print(f"Detalhe: {err}")
         print("Dica: Verifique se as siglas dos paises estao corretas na opcao 4 (ex: UY para Uruguai).\n")
+
+
+def ask_randomize() -> bool:
+    ans = prompt_input("Deseja uma amostra aleatoria (s) ou os mais citados (n)? [padrao: s]: ")
+    if ans is None:
+        return None
+    return ans.lower() != 'n'
