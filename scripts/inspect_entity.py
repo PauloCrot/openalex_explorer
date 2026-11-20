@@ -1,26 +1,15 @@
 import json
-from typing import Any, Dict, List
+import sys
+from typing import Any
 from src.api.client import OpenAlexClient
+from scripts.utils.schema_inspector import merge_dict_samples
 
-def merge_dict_samples(dict_list: List[Dict[str, Any]]) -> Dict[str, Any]:
-    """Combina chaves de todos os itens de uma lista de dicts, para nao perder campos."""
-    merged = {}
-    for item in dict_list:
-        if not isinstance(item, dict):
-            continue
-        for k, v in item.items():
-            if k not in merged or merged[k] in (None, [], {}):
-                merged[k] = v
-
-    return merged
 
 def print_schema(data: Any, prefix: str = ""):
     if isinstance(data, dict):
-        # Evita poluir a saida com centenas de palavras do indice invertido do resumo
         if prefix.endswith("abstract_inverted_index"):
-            print(f"{prefix} -> dict (indice invertido com {len(data)} termos)")
+            print(f"{prefix} -> dict (índice invertido com {len(data)} termos)")
             return
-
         for key, value in data.items():
             path = f"{prefix}.{key}" if prefix else key
             print_schema(value, path)
@@ -40,13 +29,24 @@ def print_schema(data: Any, prefix: str = ""):
         sample = str(data).replace("\n", " ")[:60]
         print(f"{prefix} -> {val_type} (ex: {sample})")
 
-if __name__ == "__main__":
+
+def inspect_endpoint(endpoint: str):
+    """Baixa o JSON bruto de um endpoint (ex: 'institutions/I4210118976') e salva em output/raw_samples/."""
     client = OpenAlexClient(email="paulo.crot14@unifesp.br")
-    
-    raw_work = client.get("works/W4308551724")
+    raw_data = client.get(endpoint)
 
-    with open("work_W4308551724_raw.json", "w", encoding="utf-8") as f:
-        json.dump(raw_work, f, indent=2, ensure_ascii=False)
+    entity_plural, entity_id = endpoint.strip("/").split("/")
+    entity_singular = entity_plural.rstrip("s")
+    filename = f"output/raw_samples/{entity_singular}_{entity_id}_raw.json"
 
-    print("=== MAPA COMPLETO DE CAMPOS: ASSET WORK (W4308551724) ===\n")
-    print_schema(raw_work)
+    with open(filename, "w", encoding="utf-8") as f:
+        json.dump(raw_data, f, indent=2, ensure_ascii=False)
+
+    print(f"=== MAPA COMPLETO DE CAMPOS: {entity_singular.upper()} ({entity_id}) ===")
+    print(f"Arquivo salvo em: {filename}\n")
+    print_schema(raw_data)
+
+
+if __name__ == "__main__":
+    alvo = sys.argv[1] if len(sys.argv) > 1 else "institutions/I4210118976"
+    inspect_endpoint(alvo)
