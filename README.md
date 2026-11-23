@@ -1,31 +1,31 @@
 # OpenAlex Explorer (Protótipo)
 
-Protótipo desenvolvido no âmbito de Iniciação Científica para extração, normalização e análise exploratória de metadados científicos da América Latina utilizando a API REST.
+Protótipo desenvolvido no âmbito de Iniciação Científica para extração, normalização e análise exploratória de metadados científicos da América Latina utilizando a API REST do OpenAlex.
 
-> **Status:** Protótipo inicial (v0.1) focado na entidade `Works` (publicações e redes de coautoria).
+> **Status:** Etapa 2 - mapeamento de metadados e validação de filtros para `Works`, `Institutions` e `Authors` (integração de `Institutions` e `Authors` no menu CLI em andamento).
 
-## Fase Atual
+## Funcionalidades e Entregas
 
-- **Pipeline ETL Modular:** Extração via API (`extract`), normalização de JSONs aninhados e arrays de autores/países (`transform`) e exportação tabular (`load`).
-- **Interface CLI Interativa:** Menu via terminal com tratamento de erros HTTP e opção de cancelamento a qualquer momento.
-- **Modos de Consulta:**
-  - Coautoria direta (`AND`) entre pares de países.
-  - Produção científica por lista de países.
-  - Filtragem por tópico (via ID do OpenAlex ou busca interativa por palavra-chave).
-  - Tabela de referência rápida com códigos ISO 3166-1 alpha-2 da América Latina.
-- Amostragem e Persistência Segura: Suporte a extração por amostragem aleatória (`sample`) ou ordenação por citações, salvando os resultados em `output/` com versionamento automático (`_1`, `_2`, ...) para evitar sobrescrita de dados.
+- **Mapeamento de Metadados (`docs/schemas/`):** Inventário completo e categorizado dos campos e chaves de cruzamento para `Work`, `Institution` e `Author`, acompanhado de validação de volumetria geográfica (Brasil, América do Sul).
+- **Pipeline ETL Modular (`src/`):** Extração via API (`extract`), normalização de JSONs aninhados (`transform` + `parsers`) e exportação tabular (`load`) com versionamento automático em `output/` (`_1`, `_2`, ...).
+- **Interface CLI Interativa:** Menu via terminal com tratamento de erros HTTP, amostragem (`sample` ou ordenação por citações) e opção de cancelamento (`c` / `cancelar`) para consultas de `Works` (coautoria `AND`, lista de países `OR`, tópicos e códigos ISO da LatAm).
 
 ## Estrutura do Projeto
 
 ```text
 openalex_explorer/
-├── main.py              # Ponto de entrada da aplicação
+├── main.py              # Ponto de entrada da aplicação CLI
 ├── requirements.txt     # Dependências do projeto
+├── docs/
+│   └── schemas/         # Inventários de campos (Work, Institution, Author)
+├── scripts/             # Inspeção de assets brutos e validação de filtros
 └── src/
     ├── config.py        # Configurações globais e códigos ISO LatAm
     ├── api/             # Cliente HTTP (Polite Pool do OpenAlex)
     ├── cli/             # Menu interativo, utilitários e handlers
-    └── etl/             # Extração, transformação, carga e orquestração
+    ├── etl/             # Extração, transformação, carga e orquestração
+    ├── filters/         # Montagem de queries por país e tópico
+    └── parsers/         # Achata JSONs brutos (Work, Institution, Author)
 
 ## Modo de Execução
 
